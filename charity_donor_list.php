@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: Charity Donor List
+Plugin Name: Donor List
 Plugin URI: [insert the plugin uri here]
 Description: A list of donors
 Author: Daniel Stockman
@@ -22,8 +22,8 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
-if ( !class_exists( 'CharityDonorList' ) ):
-class CharityDonorList {
+if ( !class_exists( 'DonorList' ) ):
+class DonorList {
 
 	var $db_table_name = '';
 	var $states_array;
@@ -31,7 +31,7 @@ class CharityDonorList {
 	/**
 	* Constructor
 	*/
-	function CharityDonorList() { $this->__construct(); }
+	function DonorList() { $this->__construct(); }
 
 	function __construct() {
 		global $wpdb;
@@ -292,15 +292,15 @@ class CharityDonorList {
 	* Adds a link to the stylesheet to the header
 	*/
 	function add_css() {
-		echo '<link rel="stylesheet" href="'.get_bloginfo('wpurl').'/wp-content/plugins/charity_donor_list/style.css" type="text/css" media="screen"  />'; 
+		echo '<link rel="stylesheet" href="'.get_bloginfo('wpurl').'/wp-content/plugins/donor_list/style.css" type="text/css" media="screen"  />'; 
 	}
 
 }
 endif;
 
 //instantiate the class
-if ( class_exists( 'CharityDonorList' ) ) {
-	$CharityDonorList = new CharityDonorList();
+if ( class_exists( 'DonorList' ) ) {
+	$DonorList = new DonorList();
 }
 
 ?>
