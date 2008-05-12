@@ -59,13 +59,13 @@ class CharityDonorList {
 		);
 	}
 
+	/**
+	* Top-level admin page for editing the list
+	*/
 	function add_admin_page() {
 		add_menu_page( 'Donor List', 'Donors', 10, __FILE__, array( &$this, "admin_page" ) );
 	}
 
-	/**
-	* Outputs the HTML for the admin page.
-	*/
 	function admin_page() {
 		?>
 		<div class="wrap">
@@ -95,7 +95,7 @@ class CharityDonorList {
 	}
 
 	/**
-	* Creates or updates the database table, and adds a database table version number to the WordPress options.
+	* Create or update database table, database table version number -> WP option
 	*/
 	function install() {
 		global $wpdb;
@@ -130,16 +130,13 @@ class CharityDonorList {
 	}
 
 	/**
-	* Registers the widget for use
+	* Widget
 	*/
 	function register_widget() {
 		$opts = array( 'classname' => 'donor-list', 'description' => 'A list of donors.' );
 		wp_register_sidebar_widget( 'donor-list', 'Donor List', array( &$this, "widget" ), $opts );
 	}
 
-	/**
-	* Contains the widget logic
-	*/
 	function widget( $args ) {
 		extract( $args );
 		?>
@@ -156,7 +153,6 @@ class CharityDonorList {
 	function add_css() {
 		echo '<link rel="stylesheet" href="'.get_bloginfo('wpurl').'/wp-content/plugins/charity_donor_list/style.css" type="text/css" media="screen"  />'; 
 	}
-
 
 }
 endif;
