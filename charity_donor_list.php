@@ -37,9 +37,9 @@ class CharityDonorList {
 
 		register_activation_hook( __FILE__, array( &$this, "install" ) );
 
-		add_action( "admin_menu", array( &$this, "add_admin_page" ) );
-		add_action( "plugins_loaded", array( &$this, "register_widget" ) );
-		add_action( "wp_head", array( &$this, "add_css" ) );
+		add_action( "admin_menu",       array( &$this, "add_admin_page"  ) );
+		add_action( "widgets_init",     array( &$this, "register_widget" ) );
+		add_action( "wp_print_scripts", array( &$this, "add_css" ) );
 
 		/*
 		* Register the shortcode
@@ -132,8 +132,9 @@ class CharityDonorList {
 	/**
 	* Registers the widget for use
 	*/
-	function register_widget( $args ) {
-		register_sidebar_widget( "Donor List", array( &$this, "widget" ) );
+	function register_widget() {
+		$opts = array( 'classname' => 'donor-list', 'description' => 'A list of donors.' );
+		wp_register_sidebar_widget( 'donor-list', 'Donor List', array( &$this, "widget" ), $opts );
 	}
 
 	/**
