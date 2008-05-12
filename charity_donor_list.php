@@ -41,60 +41,46 @@ class CharityDonorList {
 	function __construct() {
 		global $wpdb;
 
-		register_activation_hook( __FILE__, array( &$this, "install_on_activation" ) );
+		register_activation_hook( __FILE__, array( &$this, "install" ) );
 
 		add_action( "admin_menu", array( &$this, "add_admin_pages" ) );
-		add_action( "plugins_loaded", array( &$this, "register_widget_charity_donor_list" ) );
+		add_action( "plugins_loaded", array( &$this, "register_widget" ) );
 		add_action( "wp_head", array( &$this, "add_css" ) );
 
 		/*
 		* Register the shortcode
 		*/
 		if ( function_exists( 'add_shortcode' ) ) {
-			add_shortcode('donor_list', array( &$this , 'donor_list_shortcode_handler' ) );
+			add_shortcode('donor_list', array( &$this , 'shortcode' ) );
 		}
 
 		$this->db_table_name = $wpdb->prefix . "charity_donor_list";
 
 	}
 
-
 	function add_admin_pages() {
-		add_menu_page( 'Donors', 'Donors', 10, __FILE__, array( &$this, "output_main_admin_page" ) );
-		add_submenu_page( __FILE__, "Edit Donor List", "Edit", 10, "edit_donors", array( &$this, "output_sub_admin_page_1" ) );
+		add_menu_page( 'Donor List', 'Donors', 10, __FILE__, array( &$this, "admin_page" ) );
 	}
 
 	/**
 	* Outputs the HTML for the admin page.
 	*/
-	function output_main_admin_page() {
+	function admin_page() {
 		?>
 		<div class="wrap">
 			<h2>Admin Menu Placeholder for Donors</h2>
-			<p>You can modify the content that is output to this page by modifying the method: <strong>output_main_admin_page</strong></p>
+			<p>You can modify the content that is output to this page by modifying the method: <strong>admin_page</strong></p>
 		</div>
 		<?php
 	}
 
 	/**
-	* Outputs the HTML for the admin sub page.
-	*/
-	function output_sub_admin_page_1() {
-		?>
-		<div class="wrap">
-			<h2>Admin Menu Placeholder for Donors_1 a subpage of Donors</h2>
-			<p>You can modify the content that is output to this page by modifying the method <strong>output_sub_admin_page_1</strong></p>
-		</div>
-		<?php
-	}
-
-	/**
-	* donor_list_shortcode_handler - produces and returns the content to replace the shortcode tag
+	* shortcode - produces and returns the content to replace the shortcode tag
 	*
-	* @param array $atts  An array of attributes passed from the shortcode
-	* @param string $content   If the shortcode wraps round some html, this will be passed.
+	* @param array 	$atts		An array of attributes passed from the shortcode
+	* @param string	$content	If the shortcode wraps round some html, this will be passed.
 	*/
-	function donor_list_shortcode_handler( $atts , $content = null ) {
+	function shortcode( $atts , $content = null ) {
 		//add the attributes you want to accept to the array below
 		$attributes = shortcode_atts( array(
 	      'attr_1' => 'attribute 1 default',
@@ -104,15 +90,13 @@ class CharityDonorList {
 
 		//create the content you want to replace the shortcode in the post, here.
 
-		//return the content. DO NOT USE ECHO.
 		return 'default return value from donor_list';
 	}
-
 
 	/**
 	* Creates or updates the database table, and adds a database table version number to the WordPress options.
 	*/
-	function install_on_activation() {
+	function install() {
 		global $wpdb;
 		$plugin_db_version = "0.1";
 		$installed_ver = get_option( "charity_donor_list_db_version" );
@@ -146,15 +130,14 @@ class CharityDonorList {
 	/**
 	* Registers the widget for use
 	*/
-	function register_widget_charity_donor_list( $args ) {
-		register_sidebar_widget( "Donor List", array( &$this, "widget_charity_donor_list" ) );
+	function register_widget( $args ) {
+		register_sidebar_widget( "Donor List", array( &$this, "widget" ) );
 	}
-
 
 	/**
 	* Contains the widget logic
 	*/
-	function widget_charity_donor_list( $args ) {
+	function widget( $args ) {
 		extract( $args );
 		?>
 		<?php echo $before_widget; ?>
