@@ -25,9 +25,6 @@ GNU General Public License for more details.
 if ( !class_exists( 'CharityDonorList' ) ):
 class CharityDonorList {
 
-	/**
-	* @var string   The name of the database table used by the plugin
-	*/
 	var $db_table_name = '';
 
 	/**
@@ -43,7 +40,7 @@ class CharityDonorList {
 
 		register_activation_hook( __FILE__, array( &$this, "install" ) );
 
-		add_action( "admin_menu", array( &$this, "add_admin_pages" ) );
+		add_action( "admin_menu", array( &$this, "add_admin_page" ) );
 		add_action( "plugins_loaded", array( &$this, "register_widget" ) );
 		add_action( "wp_head", array( &$this, "add_css" ) );
 
@@ -55,10 +52,9 @@ class CharityDonorList {
 		}
 
 		$this->db_table_name = $wpdb->prefix . "charity_donor_list";
-
 	}
 
-	function add_admin_pages() {
+	function add_admin_page() {
 		add_menu_page( 'Donor List', 'Donors', 10, __FILE__, array( &$this, "admin_page" ) );
 	}
 
@@ -110,14 +106,15 @@ class CharityDonorList {
 			//		http://codex.wordpress.org/Creating_Tables_with_Plugins
 			// remember to update the version number every time you want to make a change.
 			//*************************************************************************************
-			$sql = "CREATE TABLE " . $this->db_table_name . " (
-			id mediumint(9) NOT NULL AUTO_INCREMENT,
-			first_name VARCHAR(100),
-			last_name VARCHAR(100),
-			city VARCHAR(100),
-			state CHAR(2),
-			email VARCHAR(100),
-			UNIQUE KEY id (id)
+			$sql = "CREATE TABLE {$this->db_table_name} (
+				id mediumint(9) NOT NULL AUTO_INCREMENT,
+				first_name VARCHAR(100),
+				last_name VARCHAR(100) NOT NULL,
+				city VARCHAR(100),
+				state CHAR(2),
+				email VARCHAR(100),
+				PRIMARY KEY  (id),
+				KEY lname (last_name)
 			);";
 
 			require_once( ABSPATH . "wp-admin/upgrade-functions.php" );
