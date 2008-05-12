@@ -28,13 +28,10 @@ class CharityDonorList {
 	var $db_table_name = '';
 
 	/**
-	* PHP 4 Compatible Constructor
+	* Constructor
 	*/
 	function CharityDonorList() { $this->__construct(); }
 
-	/**
-	* PHP 5 Constructor
-	*/
 	function __construct() {
 		global $wpdb;
 
@@ -52,6 +49,14 @@ class CharityDonorList {
 		}
 
 		$this->db_table_name = $wpdb->prefix . "charity_donor_list";
+
+		$this->db_field_prep = array(
+			'first_name' => 's'
+			,'last_name' => 's'
+			,'city'  => 's'
+			,'state' => 's'
+			,'email' => 's'
+		);
 	}
 
 	function add_admin_page() {
