@@ -26,6 +26,7 @@ if ( !class_exists( 'CharityDonorList' ) ):
 class CharityDonorList {
 
 	var $db_table_name = '';
+	var $states_array;
 
 	/**
 	* Constructor
@@ -48,15 +49,92 @@ class CharityDonorList {
 			add_shortcode('donor_list', array( &$this , 'shortcode' ) );
 		}
 
-		$this->db_table_name = $wpdb->prefix . "charity_donor_list";
+		$this->db_table_name = $wpdb->prefix . "donor_list";
+		$this->states_table  = $wpdb->prefix . "donor_states";
+		$this->init_states_array();
 
-		$this->db_field_prep = array(
-			'first_name' => 's'
-			,'last_name' => 's'
-			,'city'  => 's'
-			,'state' => 's'
-			,'email' => 's'
+		$this->db_field_type = array(
+			'first_name' => '%s'
+			,'last_name' => '%s'
+			,'city'      => '%s'
+			,'state'     => '%u'
+			,'email'     => '%s'
 		);
+		// test data
+		$this->db_test_data = array(
+			'person' => array(
+				'first_name' => 'Joe'
+				,'last_name' => 'Donor'
+				// ,'city'      => 'Topeka'
+				// ,'state'     => 30
+				,'email'     => 'test@kansas.com'
+			),
+			'business' => array(
+				'first_name' => ""
+				,'last_name' => "Joe's Auto Parts"
+				,'city'      => "Kansas City"
+				,'state'     => 20
+				,'email'     => "biz@missouri.com"
+			),
+		);
+	}
+
+	function init_states_array() {
+		$this->states_array = array(
+			'AK' => 'Alaska',
+			'AL' => 'Alabama',
+			'AR' => 'Arkansas',
+			'AZ' => 'Arizona',
+			'CA' => 'California',
+			'CO' => 'Colorado',
+			'CT' => 'Connecticut',
+			'DC' => 'District of Columbia',
+			'DE' => 'Delaware',
+			'FL' => 'Florida',
+			'GA' => 'Georgia',
+			'HI' => 'Hawaii',
+			'IA' => 'Iowa',
+			'ID' => 'Idaho',
+			'IL' => 'Illinois',
+			'IN' => 'Indiana',
+			'KS' => 'Kansas',
+			'KY' => 'Kentucky',
+			'LA' => 'Louisiana',
+			'MA' => 'Massachusetts',
+			'MD' => 'Maryland',
+			'ME' => 'Maine',
+			'MI' => 'Michigan',
+			'MN' => 'Minnesota',
+			'MO' => 'Missouri',
+			'MS' => 'Mississippi',
+			'MT' => 'Montana',
+			'NC' => 'North Carolina',
+			'ND' => 'North Dakota',
+			'NE' => 'Nebraska',
+			'NH' => 'New Hampshire',
+			'NJ' => 'New Jersey',
+			'NM' => 'New Mexico',
+			'NV' => 'Nevada',
+			'NY' => 'New York',
+			'OH' => 'Ohio',
+			'OK' => 'Oklahoma',
+			'OR' => 'Oregon',
+			'PA' => 'Pennsylvania',
+			'PR' => 'Puerto Rico',
+			'RI' => 'Rhode Island',
+			'SC' => 'South Carolina',
+			'SD' => 'South Dakota',
+			'TN' => 'Tennessee',
+			'TX' => 'Texas',
+			'UT' => 'Utah',
+			'VA' => 'Virginia',
+			'VT' => 'Vermont',
+			'WA' => 'Washington',
+			'WI' => 'Wisconsin',
+			'WV' => 'West Virginia',
+			'WY' => 'Wyoming'
+		);
+		$this->states_array_indices = array_keys( $this->states_array );
 	}
 
 	/**
@@ -100,7 +178,7 @@ class CharityDonorList {
 	function install() {
 		global $wpdb;
 		$plugin_db_version = "0.1";
-		$installed_ver = get_option( "charity_donor_list_db_version" );
+		$installed_ver = get_option( "donor_list_db_version" );
 		// only run installation if not installed or if previous version installed
 		if ( $installed_ver === false || $installed_ver != $plugin_db_version ) {
 
@@ -125,10 +203,73 @@ class CharityDonorList {
 			require_once( ABSPATH . "wp-admin/upgrade-functions.php" );
 			dbDelta( $sql );
 			//add a database version number for future upgrade purposes
-			update_option( "charity_donor_list_db_version", $plugin_db_version );
+			update_option( "donor_list_db_version", $plugin_db_version );
+
+			if ( $wpdb->get_var("SHOW TABLES LIKE '$this->states_table'") != $this->states_table ) {
+				// join table for states because i <3 normalization
+				$ssql = "CREATE TABLE {$this->states_table} (
+					id mediumint(9) NOT NULL AUTO_INCREMENT,
+					iso_code CHAR(2),
+					name VARCHAR(50),
+					PRIMARY KEY  (id),
+					KEY iso (iso_code)
+				);";
+				dbDelta( $ssql );
+				// insert data
+				$states = $this->states_array();
+				$values = array();
+				foreach ($states as $iso => $name) {
+					$values[] = "('$iso','$name')";
+				}
+				$values = implode( ",\n", $values );
+				$insert = "INSERT INTO {$this->states_table} (`iso_code`,`name`) VALUES \n$values;";
+			}
 		}
 	}
 
+	/**
+	* CRUD - { create, list (retrieve), update, delete } DB operations
+	*/
+	function insert_or_update_values( $posted ) {
+		global $wpdb;
+		$fieldtypes = $this->db_field_type;
+		$statement = array();
+
+		foreach ( $fieldtypes as $field => $type ) {
+			$exists = ( array_key_exists( $field, $posted ) && trim( $posted[$field] ) );
+			$statement[] = "$field = " . (( $exists ) ? $type : 'NULL');
+			if ( ! $exists ) unset( $fieldtypes[ $field ] );
+		}
+
+		// string to be formatted, first argument to wpdb->prepare
+		$values = array( implode( ",\n\t", $statement ) );
+
+		// values for replacements, 1+nth args to wpdb->prepare
+		foreach ( $fieldtypes as $key => $value ) {
+			$values[] = trim( $posted[ $key ] );
+		}
+
+		return call_user_func_array( array( &$wpdb, 'prepare' ), $values );
+	}
+
+	function create( $posted ) {
+		$values = $this->insert_or_update_values( $posted );
+		$sql = "INSERT INTO {$this->db_table_name} SET\n\t$values;";
+		return $sql;
+	}
+
+/*	function list() {
+		
+	}
+
+	function update( $id ) {
+		
+	}
+
+	function delete( $id ) {
+		
+	}
+*/
 	/**
 	* Widget
 	*/
