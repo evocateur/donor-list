@@ -119,11 +119,11 @@ class DonorList {
 			// remember to update the version number every time you want to make a change.
 			//*************************************************************************************
 			$sql = "CREATE TABLE {$this->db_table_name} (
-				id mediumint(9) NOT NULL AUTO_INCREMENT,
+				id SMALLINT NOT NULL AUTO_INCREMENT,
 				first_name VARCHAR(100),
 				last_name VARCHAR(100) NOT NULL,
 				city VARCHAR(100),
-				state CHAR(2),
+				state TINYINT,
 				email VARCHAR(100),
 				PRIMARY KEY  (id),
 				KEY lname (last_name)
@@ -133,27 +133,28 @@ class DonorList {
 			dbDelta( $sql );
 			//add a database version number for future upgrade purposes
 			update_option( "donor_list_db_version", $plugin_db_version );
+		}
 
-			if ( $wpdb->get_var("SHOW TABLES LIKE '$this->states_table'") != $this->states_table ) {
-				// join table for states because i <3 normalization
-				$ssql = "CREATE TABLE {$this->states_table} (
-					id mediumint(9) NOT NULL AUTO_INCREMENT,
-					iso_code CHAR(2),
-					name VARCHAR(50),
-					PRIMARY KEY  (id),
-					KEY iso (iso_code)
-				);";
-				dbDelta( $ssql );
-				// insert data
-				$states = $this->states['source'];
-				$values = array();
-				foreach ($states as $iso => $name) {
-					$values[] = "('$iso','$name')";
-				}
-				$values = implode( ",", $values );
-				$insert = "INSERT INTO {$this->states_table} (`iso_code`,`name`) VALUES $values;";
-				$wpdb->query( $insert );
+		if ( $wpdb->get_var("SHOW TABLES LIKE '$this->states_table'") != $this->states_table ) {
+			// join table for states because i <3 normalization
+			$sql = "CREATE TABLE {$this->states_table} (
+				id TINYINT NOT NULL AUTO_INCREMENT,
+				iso_code CHAR(2),
+				name VARCHAR(50),
+				PRIMARY KEY  (id),
+				KEY iso (iso_code)
+			);";
+			// don't wanna check for dbDelta, don't need it anyway
+			$wpdb->query( $sql );
+			// insert data
+			$states = $this->states['source'];
+			$values = array();
+			foreach ($states as $iso => $name) {
+				$values[] = "('$iso','$name')";
 			}
+			$values = implode( ",", $values );
+			$insert = "INSERT INTO {$this->states_table} (`iso_code`,`name`) VALUES $values;";
+			$wpdb->query( $insert );
 		}
 	}
 
