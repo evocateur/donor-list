@@ -2,7 +2,7 @@
 /*
 Plugin Name: Donor List
 Plugin URI: [insert the plugin uri here]
-Description: A list of donors
+Description: A list of donors; [donor-list] shortcode, widget, admin editable
 Author: Daniel Stockman
 Version: 0.2
 Author URI: http://evocateur.org/
@@ -47,7 +47,7 @@ class DonorList {
 		* Register the shortcode
 		*/
 		if ( function_exists( 'add_shortcode' ) ) {
-			add_shortcode('donor_list', array( &$this , 'shortcode' ) );
+			add_shortcode('donor-list', array( &$this , 'shortcode' ) );
 		}
 
 		$this->db_version_key = "donor_list_db_version";
@@ -74,7 +74,7 @@ class DonorList {
 		?>
 		<div class="wrap">
 			<h2>Donor List</h2>
-			<p>You can modify the content that is output to this page by modifying the method: <strong>admin_page</strong></p>
+			<?php echo do_shortcode('[donor-list edit=1]'); ?>
 		</div>
 		<?php
 	}
@@ -85,16 +85,8 @@ class DonorList {
 	* @param array 	$atts		An array of attributes passed from the shortcode
 	* @param string	$content	If the shortcode wraps round some html, this will be passed.
 	*/
-	function shortcode( $atts , $content = null ) {
-		// defaults
-		$attributes = shortcode_atts( array(
-			'limit' => 10,
-			// etc
-		), $atts );
-
-		$shorty = '';
-
-		return $shorty;
+	function shortcode( $atts, $content = null ) {
+		return $this->get_list( $atts );
 	}
 
 	/**
@@ -221,10 +213,40 @@ class DonorList {
 		return false;
 	}
 
-	function get_set( $limit = false ) {
-		$records = false;
-		$limit_by = ( (int) $limit ) ? "LIMIT $limit" : '';
-		return $records;
+	function get_list( $attrs = false ) {
+		global $wpdb;
+
+		extract( shortcode_atts( array(
+			'limit' => 0,
+			'edit'  => 0
+		), array_filter( (array) $attrs ) ) );
+
+		$_edit  = '';
+		$_limit = ( (int) $limit ) ? "\nLIMIT $limit" : '';
+
+		$sql = "SELECT t.id, t.first_name, t.last_name,
+			t.email, t.city, s.iso_code AS state
+		FROM {$this->db_table_name} AS t
+		LEFT JOIN {$this->states_table} AS s ON ( s.id = t.state )
+		ORDER BY t.last_name, t.first_name $_limit;";
+
+		$donors = $wpdb->get_results( $sql );
+
+		if ( true === (bool) $edit ) {
+			$_edit = '<dd class="edit"><a href="#REPLACE" title="Edit Donor">edit</a></dd>';
+		}
+
+		$s = array();
+		$s[] = "\n\t<dl id=\"donor-list\">";
+		foreach ( $donors as $donor ) {
+			$edit_link = preg_replace( '/REPLACE/', $donor->id, $_edit );
+			$citystate = ( trim( $donor->city ) ? $donor->city . ', ' . $donor->state : '' );
+			$lastfirst = $donor->last_name . ( $donor->first_name ? ', ' . $donor->first_name : '' );
+			$s[] = "\t<dt>$lastfirst</dt><dd>$citystate</dd>$edit_link";
+		}
+		$s[] = "</dl>\n";
+
+		return implode( "\n\t", $s );
 	}
 
 	/**
