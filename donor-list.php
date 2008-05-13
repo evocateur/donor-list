@@ -4,7 +4,7 @@ Plugin Name: Donor List
 Plugin URI: [insert the plugin uri here]
 Description: A list of donors
 Author: Daniel Stockman
-Version: 0.1
+Version: 0.2
 Author URI: http://evocateur.org/
 Generated At: www.wp-fun.co.uk;
 */ 
@@ -50,8 +50,15 @@ class DonorList {
 			add_shortcode('donor_list', array( &$this , 'shortcode' ) );
 		}
 
+		$this->db_version_key = "donor_list_db_version";
+		$this->db_version = array(
+			'plugin'    => '0.2',
+			'installed' => get_option( $this->db_version_key )
+		);
+
 		$this->db_table_name = $wpdb->prefix . "donor_list";
 		$this->states_table  = $wpdb->prefix . "donor_states";
+
 		$this->init_states();
 		$this->init_test_data();
 	}
@@ -96,11 +103,9 @@ class DonorList {
 	function install() {
 		global $wpdb;
 
-		$plugin_db_version = "0.1";
-		$installed_ver = get_option( "donor_list_db_version" );
-
 		// only run installation if not installed or if previous version installed
-		if ( $installed_ver === false || $installed_ver != $plugin_db_version ) {
+		if ( $this->db_version['installed'] === false
+		||   $this->db_version['installed'] != $this->db_version['plugin'] ) {
 
 			//*************************************************************************************
 			// Create the sql - You will need to edit this to include the columns you need
@@ -123,7 +128,7 @@ class DonorList {
 			require_once( ABSPATH . "wp-admin/upgrade-functions.php" );
 			dbDelta( $sql );
 			//add a database version number for future upgrade purposes
-			update_option( "donor_list_db_version", $plugin_db_version );
+			update_option( $this->db_version_key, $this->db_version['plugin'] );
 		}
 
 		if ( $wpdb->get_var("SHOW TABLES LIKE '$this->states_table'") != $this->states_table ) {
@@ -152,15 +157,13 @@ class DonorList {
 	function uninstall() {
 		global $wpdb;
 
-		// delete option
-		delete_option( "donor_list_db_version" );
-
 		// delete states join table
-		$wpdb->query("DROP TABLE {$this->states_table};");
+		$wpdb->query( "DROP TABLE {$this->states_table};" );
 
-		// only delete donors if empty
+		// only delete donors + db_version option if donor_list empty
 		if ( ! $wpdb->get_var("SELECT COUNT(id) FROM {$this->db_table_name};") ) {
-			$wpdb->query("DROP TABLE {$this->db_table_name};");
+			$wpdb->query( "DROP TABLE {$this->db_table_name};" );
+			delete_option( $this->db_version_key );
 		}
 	}
 
@@ -211,7 +214,7 @@ class DonorList {
 		$id = (int) $id;
 		if ( $id ) {
 			global $wpdb;
-			$sql = $wpdb->prepare("DELETE FROM {$this->db_table_name} WHERE id = %u", $id);
+			$sql = $wpdb->prepare( "DELETE FROM {$this->db_table_name} WHERE id = %u", $id );
 			$wpdb->query( $sql );
 			return true;
 		}
