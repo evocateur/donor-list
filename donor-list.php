@@ -99,13 +99,7 @@ class DonorList {
 		if ( $this->db_version['installed'] === false
 		||   $this->db_version['installed'] != $this->db_version['plugin'] ) {
 
-			//*************************************************************************************
-			// Create the sql - You will need to edit this to include the columns you need
-			// Using the dbdelta function to allow the table to be updated if this is an update.
-			// Read the limitations of the dbdelta function here:
-			//		http://codex.wordpress.org/Creating_Tables_with_Plugins
-			// remember to update the version number every time you want to make a change.
-			//*************************************************************************************
+			// http://codex.wordpress.org/Creating_Tables_with_Plugins
 			$sql = "CREATE TABLE {$this->db_table_name} (
 				id SMALLINT NOT NULL AUTO_INCREMENT,
 				first_name VARCHAR(100),
@@ -124,6 +118,7 @@ class DonorList {
 		}
 
 		if ( $wpdb->get_var("SHOW TABLES LIKE '$this->states_table'") != $this->states_table ) {
+
 			// join table for states because i <3 normalization
 			$sql = "CREATE TABLE {$this->states_table} (
 				id TINYINT NOT NULL AUTO_INCREMENT,
@@ -134,12 +129,11 @@ class DonorList {
 			);";
 			// don't wanna check for dbDelta, don't need it anyway
 			$wpdb->query( $sql );
+
 			// insert data
 			$states = $this->states['source'];
 			$values = array();
-			foreach ($states as $iso => $name) {
-				$values[] = "('$iso','$name')";
-			}
+			foreach ( $states as $iso => $name ) { $values[] = "('$iso','$name')"; }
 			$values = implode( ",", $values );
 			$insert = "INSERT INTO {$this->states_table} (`iso_code`,`name`) VALUES $values;";
 			$wpdb->query( $insert );
@@ -184,7 +178,7 @@ class DonorList {
 
 		// values for replacements, 1+nth args to wpdb->prepare
 		foreach ( $fieldtypes as $key => $value ) {
-			$values[] = trim( $posted[ $key ] );
+			$values[] = trim( wp_specialchars( $posted[ $key ] ) );
 		}
 
 		// magic!
