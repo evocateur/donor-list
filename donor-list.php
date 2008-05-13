@@ -26,6 +26,7 @@ if ( !class_exists( 'DonorList' ) ):
 class DonorList {
 
 	var $db_table_name = '';
+	var $plugin_url = '';
 	var $states = array();
 
 	/**
@@ -36,16 +37,19 @@ class DonorList {
 	function __construct() {
 		global $wpdb;
 
+		$this->plugin_url = get_option('siteurl') . "/wp-content/plugins/" . plugin_basename( dirname( __FILE__ ) ) . '/';
+
 		register_activation_hook(   __FILE__, array( &$this, "install"   ) );
 		register_deactivation_hook( __FILE__, array( &$this, "uninstall" ) );
 
 		add_action( "admin_menu",       array( &$this, "add_admin_page"  ) );
 		add_action( "widgets_init",     array( &$this, "register_widget" ) );
-		add_action( "wp_print_scripts", array( &$this, "add_css" ) );
 
-		/*
-		* Register the shortcode
-		*/
+		add_action( "wp_print_scripts",    array( &$this, "add_css" ) );
+		add_action( "admin_print_scripts", array( &$this, "add_js"  ) );
+
+		wp_register_script( 'donor-list', "{$this->plugin_url}plugin.js", array('jquery') );
+
 		if ( function_exists( 'add_shortcode' ) ) {
 			add_shortcode('donor-list', array( &$this , 'shortcode' ) );
 		}
@@ -265,7 +269,11 @@ class DonorList {
 	* Adds a link to the stylesheet to the header
 	*/
 	function add_css() {
-		echo '<link rel="stylesheet" type="text/css" href="'.get_bloginfo('wpurl').'/wp-content/plugins/donor_list/style.css" />'."\n";
+		echo '<link rel="stylesheet" type="text/css" href="'. $this->plugin_url .'style.css" />'."\n";
+	}
+
+	function add_js() {
+		wp_enqueue_script( 'donor-list' );
 	}
 
 	function init_states() {

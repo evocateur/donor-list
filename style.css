@@ -1,1 +1,11 @@
-/* blah blah something */
+#donor-list,
+#donor-list dt,
+#donor-list dd {
+	margin:  0;
+	padding: 0;
+}
+#donor-list {}
+#donor-list dt {}
+#donor-list dd {}
+#donor-list dd.edit {}
+#donor-list dd.edit a {}
