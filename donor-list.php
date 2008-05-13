@@ -64,7 +64,6 @@ class DonorList {
 		$this->states_table  = $wpdb->prefix . "donor_states";
 
 		$this->init_states();
-		$this->init_test_data();
 	}
 
 	/**
@@ -338,33 +337,6 @@ class DonorList {
 		);
 	}
 
-	function init_test_data() {
-		// test data
-		$this->db_test_data = array(
-			'person' => array(
-				'first_name' => 'Joe'
-				,'last_name' => 'Donor'
-				// ,'city'      => 'Topeka'
-				// ,'state'     => 30
-				,'email'     => 'test@kansas.com'
-			),
-			'business' => array(
-				'first_name' => ""
-				,'last_name' => "Joe's Auto Parts"
-				,'city'      => "Kansas City"
-				,'state'     => 20
-				,'email'     => "biz@missouri.com"
-			),
-			'updated' => array(
-				'first_name' => ""
-				,'last_name' => "Joe's Auto Parts"
-				,'city'      => "Kansas City"
-				,'state'     => 20
-				,'email'     => "biz@missouri.com"
-				,'id' => 8
-			),
-		);
-	}
 }
 endif;
 
