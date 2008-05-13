@@ -215,7 +215,7 @@ class DonorList {
 			'edit'  => 0
 		), array_filter( (array) $attrs ) ) );
 
-		$_edit  = '';
+		$_edit  = false;
 		$_limit = ( (int) $limit ) ? "\nLIMIT $limit" : '';
 
 		$sql = "SELECT t.id, t.first_name, t.last_name,
@@ -226,14 +226,14 @@ class DonorList {
 
 		$donors = $wpdb->get_results( $sql );
 
-		if ( true === (bool) $edit ) {
+		if ( is_admin() && true === (bool) $edit ) {
 			$_edit = '<dd class="edit"><a href="#REPLACE" title="Edit Donor">edit</a></dd>';
 		}
 
 		$s = array();
 		$s[] = "\n\t<dl id=\"donor-list\">";
 		foreach ( $donors as $donor ) {
-			$edit_link = preg_replace( '/REPLACE/', $donor->id, $_edit );
+			$edit_link = $_edit ? preg_replace( '/REPLACE/', $donor->id, $_edit ) : '';
 			$citystate = ( trim( $donor->city ) ? $donor->city . ', ' . $donor->state : '' );
 			$lastfirst = $donor->last_name . ( $donor->first_name ? ', ' . $donor->first_name : '' );
 			$s[] = "\t<dt>$lastfirst</dt><dd>$citystate</dd>$edit_link";
