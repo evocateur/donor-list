@@ -87,16 +87,15 @@ class DonorList {
 	* @param string	$content	If the shortcode wraps round some html, this will be passed.
 	*/
 	function shortcode( $atts , $content = null ) {
-		//add the attributes you want to accept to the array below
+		// defaults
 		$attributes = shortcode_atts( array(
-	      'attr_1' => 'attribute 1 default',
-	      'attr_2' => 'attribute 2 default',
-	      // ...etc
+			'limit' => 10,
+			// etc
 		), $atts );
 
-		//create the content you want to replace the shortcode in the post, here.
+		$shorty = '';
 
-		return 'default return value from donor_list';
+		return $shorty;
 	}
 
 	/**
@@ -174,9 +173,9 @@ class DonorList {
 	}
 
 	/**
-	* CRUD - { create, get (retrieve), update, delete } DB operations
+	* CRUD - { create / update, delete, get (list) } DB operations
 	*/
-	function insert_or_update_values( $posted ) {
+	function create_set( $posted ) {
 		global $wpdb;
 		$fieldtypes = $this->db_field_type;
 		$statement = array();
@@ -195,28 +194,35 @@ class DonorList {
 			$values[] = trim( $posted[ $key ] );
 		}
 
+		// magic!
 		return call_user_func_array( array( &$wpdb, 'prepare' ), $values );
 	}
 
 	function create( $posted ) {
-		$values = $this->insert_or_update_values( $posted );
-		$sql = "INSERT INTO {$this->db_table_name} SET\n\t$values;";
-		return $sql;
-	}
-
-	function update( $posted ) {
+		// update if id present, otherwise insert
 		$id = (int) $posted['id'];
-		$values = $this->insert_or_update_values( $posted );
-		$sql  = "UPDATE {$this->db_table_name} SET\n\t$values\nWHERE id = $id";
+		$values = $this->create_set( $posted );
+		$sql  = ( $id ? "UPDATE" : "INSERT INTO" );
+		$sql .= " {$this->db_table_name} SET\n\t";
+		$sql .= "$values" . ( $id ? "\nWHERE id = $id;" : ';' );
 		return $sql;
 	}
 
 	function delete( $id ) {
-		return true;
+		$id = (int) $id;
+		if ( $id ) {
+			global $wpdb;
+			$sql = $wpdb->prepare("DELETE FROM {$this->db_table_name} WHERE id = %u", $id);
+			$wpdb->query( $sql );
+			return true;
+		}
+		return false;
 	}
 
-	function get() {
-		return true;
+	function get_set( $limit = false ) {
+		$records = false;
+		$limit_by = ( (int) $limit ) ? "LIMIT $limit" : '';
+		return $records;
 	}
 
 	/**
