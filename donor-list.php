@@ -26,7 +26,7 @@ if ( !class_exists( 'DonorList' ) ):
 class DonorList {
 
 	var $db_table_name = '';
-	var $states;
+	var $states = array();
 
 	/**
 	* Constructor
@@ -54,14 +54,6 @@ class DonorList {
 		$this->states_table  = $wpdb->prefix . "donor_states";
 		$this->init_states();
 		$this->init_test_data();
-
-		$this->db_field_type = array(
-			'first_name' => '%s'
-			,'last_name' => '%s'
-			,'city'      => '%s'
-			,'state'     => '%u'
-			,'email'     => '%s'
-		);
 	}
 
 	/**
@@ -177,7 +169,13 @@ class DonorList {
 	*/
 	function create_set( $posted ) {
 		global $wpdb;
-		$fieldtypes = $this->db_field_type;
+		$fieldtypes = array(
+			'first_name' => '%s'
+			,'last_name' => '%s'
+			,'city'      => '%s'
+			,'state'     => '%u'
+			,'email'     => '%s'
+		);
 		$statement = array();
 
 		foreach ( $fieldtypes as $field => $type ) {
@@ -199,12 +197,13 @@ class DonorList {
 	}
 
 	function create( $posted ) {
+		global $wpdb;
 		// update if id present, otherwise insert
 		$id = (int) $posted['id'];
 		$values = $this->create_set( $posted );
 		$sql  = ( $id ? "UPDATE" : "INSERT INTO" );
 		$sql .= " {$this->db_table_name} SET\n\t";
-		$sql .= "$values" . ( $id ? "\nWHERE id = $id;" : ';' );
+		$sql .= "$values" . ( $id ? $wpdb->prepare( "\nWHERE id = %u;", $id ) : ';' );
 		return $sql;
 	}
 
