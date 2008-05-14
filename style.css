@@ -1,11 +1,42 @@
 #donor-list,
-#donor-list dt,
-#donor-list dd {
+#donor-list th,
+#donor-list td {
 	margin:  0;
 	padding: 0;
+	font-size: 1em;
+	font-weight: normal;
+	text-align: left;
+	border-collapse: collapse;
 }
-#donor-list {}
-#donor-list dt {}
-#donor-list dd {}
-#donor-list dd.edit {}
-#donor-list dd.edit a {}
+#donor-list {
+	margin-top: 1em;
+	border: 1px solid #aaa;
+}
+#donor-list caption {
+	font-size: x-small;
+	padding: 0 0 0.5em;
+}
+#donor-list th,
+#donor-list td {
+	padding: 0.4em 0.6em;
+	vertical-align: top;
+}
+#donor-list thead th {
+	font-weight: bold;
+	border-bottom: 2px solid;
+	font-size: 100%;
+}
+#donor-list td.edit {
+	padding: 0 0 0 0.4em;
+	vertical-align: middle;
+}
+#donor-list td.edit a {
+	padding: 0.4em;
+	text-decoration: none;
+	display: block;
+}
+/* zebra-striped table rows */
+#donor-list tr.alt th,
+#donor-list tr.alt td {
+	background-color: #ccc;
+}

@@ -6,7 +6,6 @@ Description: A list of donors; [donor-list] shortcode, widget, admin editable
 Author: Daniel Stockman
 Version: 0.2
 Author URI: http://evocateur.org/
-Generated At: www.wp-fun.co.uk;
 */ 
 
 /*  Copyright 2008  Daniel Stockman <daniel.stockman@gmail.com>
@@ -77,7 +76,7 @@ class DonorList {
 		?>
 		<div class="wrap">
 			<h2>Donor List</h2>
-			<?php echo do_shortcode('[donor-list edit=1]'); ?>
+			<?php echo $this->get_list( array('edit' => 1) ); ?>
 		</div>
 		<?php
 	}
@@ -230,18 +229,33 @@ class DonorList {
 		$donors = $wpdb->get_results( $sql );
 
 		if ( is_admin() && true === (bool) $edit ) {
-			$_edit = '<dd class="edit"><a href="#REPLACE" title="Edit Donor">edit</a></dd>';
+			$_edit = '<td class="edit"><a href="#REPLACE" title="Edit Donor">edit</a></td>';
 		}
 
-		$s = array();
-		$s[] = "\n\t<dl id=\"donor-list\">";
-		foreach ( $donors as $donor ) {
+		$s = array(
+		"\n\t<table id=\"donor-list\">",
+		"\t<caption>Alphabetized by Last Name or Business Name</caption>",
+		"<thead>",
+		"\t<th>Last Name, First</th>",
+		"\t<th>City, State</th>",
+		"</thead>",
+		"<tbody>"
+		);
+		if ( $_edit ) array_splice( $s, 3, 0, "\t<th>&nbsp;</th>" );
+		
+		foreach ( $donors as $i => $donor ) {
+			$alt = !( $i % 2 ) ? ' class="alt"' : '';
 			$edit_link = $_edit ? preg_replace( '/REPLACE/', $donor->id, $_edit ) : '';
-			$citystate = ( trim( $donor->city ) ? $donor->city . ', ' . $donor->state : '' );
-			$lastfirst = $donor->last_name . ( $donor->first_name ? ', ' . $donor->first_name : '' );
-			$s[] = "\t<dt>$lastfirst</dt><dd>$citystate</dd>$edit_link";
+			$citystate = ( trim( $donor->city ) )
+				? "<td>{$donor->city}, {$donor->state}</td>"
+				: '<td>&nbsp;</td>';
+			$firstlast = ( $first = preg_replace( '/ and /', ' &amp; ', $donor->first_name ) )
+				? "<th>{$donor->last_name}, {$first}</th>"
+				: "<th>{$donor->last_name}</th>";
+			$s[] = "\t<tr$alt>{$edit_link}{$firstlast}{$citystate}</tr>";
 		}
-		$s[] = "</dl>\n";
+		$s[] = "</tbody>";
+		$s[] = "</table>\n";
 
 		return implode( "\n\t", $s );
 	}
