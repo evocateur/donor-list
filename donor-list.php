@@ -4,7 +4,7 @@ Plugin Name: Donor List
 Plugin URI: [insert the plugin uri here]
 Description: A list of donors; [donor-list] shortcode, widget, admin editable
 Author: Daniel Stockman
-Version: 0.2
+Version: 0.3
 Author URI: http://evocateur.org/
 */ 
 
@@ -36,7 +36,11 @@ class DonorList {
 	function __construct() {
 		global $wpdb;
 
-		$this->plugin_url = get_option('siteurl') . "/wp-content/plugins/" . plugin_basename( dirname( __FILE__ ) ) . '/';
+		$base = plugin_basename( dirname( __FILE__ ) );
+		$this->plugin_url = get_option('siteurl') . "/wp-content/plugins/$base/";
+		$this->nonce_key  = 'donor-list-edit';
+
+		$admin_print_script = "admin_print_scripts-toplevel_page_$base/$base";
 
 		register_activation_hook(   __FILE__, array( &$this, "install"   ) );
 		register_deactivation_hook( __FILE__, array( &$this, "uninstall" ) );
@@ -45,9 +49,9 @@ class DonorList {
 		add_action( "widgets_init",     array( &$this, "register_widget" ) );
 
 		add_action( "wp_print_scripts",    array( &$this, "add_css" ) );
-		add_action( "admin_print_scripts", array( &$this, "add_js"  ) );
+		add_action( "$admin_print_script", array( &$this, "add_js"  ) );
 
-		wp_register_script( 'donor-list', "{$this->plugin_url}plugin.js", array('jquery') );
+		add_action( "wp_ajax_$this->nonce_key", array( &$this, 'admin_ajax' ) );
 
 		if ( function_exists( 'add_shortcode' ) ) {
 			add_shortcode('donor-list', array( &$this , 'shortcode' ) );
@@ -77,8 +81,52 @@ class DonorList {
 		<div class="wrap">
 			<h2>Donor List</h2>
 			<?php echo $this->get_list( array('edit' => 1) ); ?>
+			<?php $this->admin_form(); ?>
 		</div>
 		<?php
+	}
+
+	function admin_form() {
+		$action = get_option('siteurl') . '/wp-admin/admin-ajax.php';
+		$nonce  = wp_create_nonce( $this->nonce_key );
+		?>
+		<form id="donor-list-form" action="<?php echo $action; ?>" method="POST">
+			<div id="donor-edit">
+				<h3>
+					Edit Donor
+					<label for="donor-business"><input tabindex="1" type="checkbox" name="donor_business" id="donor-business" value="1" /> Business</label>
+				</h3>
+				<fieldset>
+					<label for="donor-first-name">First Name
+						<input tabindex="1" type="text" name="donor[first_name]" id="donor-first-name" value="" />
+					</label>
+					<label for="donor-last-name">Last Name
+						<input tabindex="1" type="text" name="donor[last_name]"  id="donor-last-name"  value="" />
+					</label>
+					<label for="donor-city">City
+						<input tabindex="1" type="text" name="donor[city]" id="donor-city" value="" />
+					</label>
+					<label for="donor-state" class="state">State
+					<?php echo $this->state_select(); ?>
+					</label>
+					<p>
+						<input tabindex="1" disabled="disabled" type="submit" name="submit" value="Submit" id="donor-submit" />
+					</p>
+				</fieldset>
+				<input type="hidden" name="donor[id]" value="" />
+				<input type="hidden" name="action" value="<?php echo $this->nonce_key; ?>" />
+				<input type="hidden" name="_wpnonce" value="<?php echo $nonce; ?>" />
+			</div>
+		</form>
+		<?php
+	}
+
+	function admin_ajax() {
+		if ( check_ajax_referer( $this->nonce_key ) ) {
+			$data = (array) $_POST['donor'];
+			$id = (int) $data['id'];
+			die("id: $id");
+		}
 	}
 
 	/**
@@ -187,11 +235,13 @@ class DonorList {
 		return call_user_func_array( array( &$wpdb, 'prepare' ), $values );
 	}
 
-	function create( $posted ) {
+	function create( $data, $id = 0 ) {
 		global $wpdb;
 		// update if id present, otherwise insert
-		$id = (int) $posted['id'];
-		$values = $this->create_set( $posted );
+		$id = (int) $id;
+		$values = $this->create_set( $data );
+		// TODO: catch empties
+		// assemble query
 		$sql  = ( $id ? "UPDATE" : "INSERT INTO" );
 		$sql .= " {$this->db_table_name} SET\n\t";
 		$sql .= "$values" . ( $id ? $wpdb->prepare( "\nWHERE id = %u;", $id ) : ';' );
@@ -221,7 +271,7 @@ class DonorList {
 		$_limit = ( (int) $limit ) ? "\nLIMIT $limit" : '';
 
 		$sql = "SELECT t.id, t.first_name, t.last_name,
-			t.email, t.city, s.iso_code AS state
+			t.email, t.city, t.state, s.iso_code AS iso
 		FROM {$this->db_table_name} AS t
 		LEFT JOIN {$this->states_table} AS s ON ( s.id = t.state )
 		ORDER BY t.last_name, t.first_name $_limit;";
@@ -233,26 +283,26 @@ class DonorList {
 		}
 
 		$s = array(
-		"\n\t<table id=\"donor-list\">",
+		"\n\t<table id=\"donor-list\" cellspacing=\"0\">",
 		"\t<caption>Alphabetized by Last Name or Business Name</caption>",
 		"<thead>",
 		"\t<th>Last Name, First</th>",
-		"\t<th>City, State</th>",
+		"\t<th class=\"cs\">City, State</th>",
 		"</thead>",
 		"<tbody>"
 		);
-		if ( $_edit ) array_splice( $s, 3, 0, "\t<th>&nbsp;</th>" );
+		$edit_link = '';
 		
 		foreach ( $donors as $i => $donor ) {
 			$alt = !( $i % 2 ) ? ' class="alt"' : '';
-			$edit_link = $_edit ? preg_replace( '/REPLACE/', $donor->id, $_edit ) : '';
+			$edit_link = preg_replace( '/REPLACE/', "{$donor->id},{$donor->state}", $_edit );
 			$citystate = ( trim( $donor->city ) )
-				? "<td>{$donor->city}, {$donor->state}</td>"
+				? "<td>{$donor->city}, {$donor->iso}</td>"
 				: '<td>&nbsp;</td>';
 			$firstlast = ( $first = preg_replace( '/ and /', ' &amp; ', $donor->first_name ) )
 				? "<th>{$donor->last_name}, {$first}</th>"
 				: "<th>{$donor->last_name}</th>";
-			$s[] = "\t<tr$alt>{$edit_link}{$firstlast}{$citystate}</tr>";
+			$s[] = "\t<tr$alt>{$firstlast}{$citystate}{$edit_link}</tr>";
 		}
 		$s[] = "</tbody>";
 		$s[] = "</table>\n";
@@ -286,7 +336,8 @@ class DonorList {
 	}
 
 	function add_js() {
-		wp_enqueue_script( 'donor-list' );
+		wp_enqueue_script( 'donor-list', "{$this->plugin_url}plugin.js", array('jquery-form') );
+		echo '<link rel="stylesheet" type="text/css" href="'. $this->plugin_url .'admin.css" />'."\n";
 	}
 
 	function init_states() {
@@ -351,6 +402,17 @@ class DonorList {
 		);
 	}
 
+	function state_select() {
+		$states = $this->states['source'];
+		$id = 0;
+		$s = array();
+		$s[] = "\n\t\t<select tabindex=\"1\" id=\"donor-state\" name=\"donor[state]\">";
+		foreach ( $states as $code => $name ) {
+			$s[] = "\t<option value=\"". ++$id ."\" title=\"$name\">$code</option>";
+		}
+		$s[] = "</select>\n";
+		return implode( "\n\t\t", $s );
+	}
 }
 endif;
 
