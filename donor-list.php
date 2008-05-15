@@ -286,7 +286,7 @@ class DonorList {
 		"\n\t<table id=\"donor-list\" cellspacing=\"0\">",
 		"\t<caption>Alphabetized by Last Name or Business Name</caption>",
 		"<thead>",
-		"\t<th>Last Name, First</th>",
+		"\t<th>Name ( <span>Last, First</span> )</th>",
 		"\t<th class=\"cs\">City, State</th>",
 		"</thead>",
 		"<tbody>"

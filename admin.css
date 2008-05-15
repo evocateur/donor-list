@@ -2,6 +2,9 @@ div.wrap #donor-list {
 	border-right-width: 0;
 	border-collapse: separate;
 }
+div.wrap #donor-list thead th {
+	padding-bottom: 6px;
+}
 #donor-list tbody tr * {
 	cursor: pointer;
 	padding-top:    4px;

@@ -26,6 +26,11 @@
 	font-weight: bold;
 	border-bottom: 2px solid;
 	font-size: 100%;
+	padding-bottom: 7px;
+}
+#donor-list thead th span {
+	font-weight: normal;
+	font-size: smaller;
 }
 /* zebra-striped table rows */
 #donor-list tr.alt th,
