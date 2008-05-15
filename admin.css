@@ -92,6 +92,11 @@ div.wrap #donor-list tr:hover td.edit a {
 	border-radius: 3px;
 }
 
+#donor-edit label {
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	user-select: none;
+}
 #donor-edit fieldset label {
 	float: left;
 	padding-left: 3px;
