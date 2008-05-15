@@ -37,11 +37,7 @@ div.wrap #donor-list thead th {
 	overflow: hidden;
 	display: none;
 }
-#donor-list td.edit a:focus,
-#donor-list td.edit a:hover,
-#donor-list td.edit a:active {
-	
-}
+
 div.wrap #donor-list tbody tr.troll td,
 div.wrap #donor-list tbody tr:hover td,
 div.wrap #donor-list tbody tr.troll th,
@@ -130,4 +126,17 @@ div.wrap #donor-list tr:hover td.edit a {
 }
 #donor-edit fieldset p input {
 	font-size: 1.5em;
+}
+
+
+/* IE ghetto */
+* html #donor-edit {
+	position: absolute;
+	top: 170px;
+}
+* html #donor-edit h3 label {
+	margin-top: -20px;
+}
+* html #donor-list td.edit a {
+	margin-left: -1px;
 }

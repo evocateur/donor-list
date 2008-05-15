@@ -30,7 +30,7 @@
 }
 #donor-list thead th span {
 	font-weight: normal;
-	font-size: smaller;
+	font-size: 0.85em;
 }
 /* zebra-striped table rows */
 #donor-list tr.alt th,
