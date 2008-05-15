@@ -12,23 +12,29 @@ jQuery(function($) {
 			alert(r);
 		}
 	})
-	.find(':checkbox')
+	.find(':checkbox:first')
 		.click(function() {
-			$('label[for=donor-last-name]').each(function(i, elm) {
-				var c = elm.firstChild;
-				c.nodeValue = (c.nodeValue.indexOf('Last') > -1)
-					? 'Business Name' : 'Last Name';
-			});
-			$('label[for=donor-first-name]').slideToggle("fast", function() {
-				$(this).children('input').val('');
-			});
-			// TODO: focus next visible input
+			$('#donor-edit fieldset label')
+				.filter('[for=donor-last-name]').each(function(i, elm) {
+					// change label text when toggled
+					var c = elm.firstChild;
+					c.nodeValue = (c.nodeValue.indexOf('Last') > -1)
+						? 'Business Name' : 'Last Name';
+				})
+			.end()
+				.filter('[for=donor-first-name]').slideToggle("fast", function() {
+					// clear value, retain reference for use in timeout
+					var self = $(this).children('input').val('').end();
+
+					// focus the first visible element
+					setTimeout(function() {
+						$('fieldset input')[ self.is(':visible') ? 0 : 1 ].focus();
+					}, 50);
+				})
+			.end();
 		})
 	.end()
-	.find(':submit')
-		// .enable()
-		.enable(false) // temporary
-	.end();
+	.find(':submit').enable();
 
 	// IE trollover
 	if ($.browser.msie) {
