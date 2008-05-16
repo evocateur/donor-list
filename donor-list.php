@@ -38,7 +38,7 @@ class DonorList {
 
 		$base = plugin_basename( dirname( __FILE__ ) );
 		$this->plugin_url = get_option('siteurl') . "/wp-content/plugins/$base/";
-		$this->nonce_key  = 'donor-list-edit';
+		$this->nonce_key  = 'donor_list_edit';
 
 		$admin_print_script = "admin_print_scripts-toplevel_page_$base/$base";
 
@@ -125,7 +125,8 @@ class DonorList {
 		if ( check_ajax_referer( $this->nonce_key ) ) {
 			$data = (array) $_POST['donor'];
 			$id = (int) $data['id'];
-			die("id: $id");
+			$method = preg_match( '/^donor_list_(edit|delete)$/', $_REQUEST['action'], $m );
+			die( $this->{$m[1]}( $data, $id ) );
 		}
 	}
 
@@ -235,7 +236,7 @@ class DonorList {
 		return call_user_func_array( array( &$wpdb, 'prepare' ), $values );
 	}
 
-	function create( $data, $id = 0 ) {
+	function edit( $data, $id = 0 ) {
 		global $wpdb;
 		// update if id present, otherwise insert
 		$id = (int) $id;
@@ -253,8 +254,9 @@ class DonorList {
 		if ( $id ) {
 			global $wpdb;
 			$sql = $wpdb->prepare( "DELETE FROM {$this->db_table_name} WHERE id = %u", $id );
-			$wpdb->query( $sql );
-			return true;
+			return $sql; // temp
+			// $wpdb->query( $sql );
+			// return true;
 		}
 		return false;
 	}
