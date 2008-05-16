@@ -61,7 +61,7 @@ jQuery(function($) {
 			elm.firstChild.nodeValue = box.label;
 		}).end()
 
-		.filter('[for=donor-first-name]')[ box.slide ](99, function() {
+		.filter('[for=donor-first-name]')[ box.slide ]("fast", function() {
 			// retain reference for use in timeout
 			var label = $(this);
 
@@ -72,7 +72,7 @@ jQuery(function($) {
 			setTimeout(function() {
 				self.focus(); // help IE get back to the edit box
 				$('fieldset input')[ label.is(':visible') ? 0 : 1 ].select();
-			}, 100);
+			}, 50);
 		}).end();
 
 	}).end()
