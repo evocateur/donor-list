@@ -46,24 +46,33 @@ jQuery(function($) {
 	})
 
 	.find(':checkbox:first').click(function() {
+		var self = $(this);
+		// config
+		var box  = {
+			checked: !!this.checked,
+			label: ((this.checked ? 'Business' : 'Last') + ' Name'),
+			slide: ('slide' + (this.checked ? 'Up' : 'Down'))
+		};
 
 		$('#donor-edit fieldset label')
 
 		.filter('[for=donor-last-name]').each(function(i, elm) {
 			// change label text when toggled
-			var c = elm.firstChild;
-			c.nodeValue = (c.nodeValue.indexOf('Last') > -1)
-				? 'Business Name' : 'Last Name';
+			elm.firstChild.nodeValue = box.label;
 		}).end()
 
-		.filter('[for=donor-first-name]').slideToggle("fast", function() {
-			// clear value, retain reference for use in timeout
-			var self = $(this).children('input').val('').end();
+		.filter('[for=donor-first-name]')[ box.slide ](99, function() {
+			// retain reference for use in timeout
+			var label = $(this);
+
+			// disable first_name if business
+			label.children('input').enable(!box.checked)
 
 			// focus the first visible element
 			setTimeout(function() {
-				$('fieldset input')[ self.is(':visible') ? 0 : 1 ].focus();
-			}, 50);
+				self.focus(); // help IE get back to the edit box
+				$('fieldset input')[ label.is(':visible') ? 0 : 1 ].select();
+			}, 100);
 		}).end();
 
 	}).end()
