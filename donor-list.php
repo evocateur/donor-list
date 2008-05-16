@@ -299,7 +299,7 @@ class DonorList {
 			$edit_link = preg_replace( '/REPLACE/', "{$donor->id},{$donor->state}", $_edit );
 			$citystate = ( trim( $donor->city ) )
 				? "<td>{$donor->city}, {$donor->iso}</td>"
-				: '<td>&nbsp;</td>';
+				: '<td><br /></td>';
 			$firstlast = ( $first = preg_replace( '/ and /', ' &amp; ', $donor->first_name ) )
 				? "<th>{$donor->last_name}, {$first}</th>"
 				: "<th>{$donor->last_name}</th>";
@@ -408,6 +408,7 @@ class DonorList {
 		$id = 0;
 		$s = array();
 		$s[] = "\n\t\t<select tabindex=\"1\" id=\"donor-state\" name=\"donor[state]\">";
+		$s[] = "\t<option value=\"\"></option>"; // empty option
 		foreach ( $states as $code => $name ) {
 			$s[] = "\t<option value=\"". ++$id ."\" title=\"$name\">$code</option>";
 		}
