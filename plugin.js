@@ -24,6 +24,17 @@ jQuery(function($) {
 	};
 
 	$('#donor-list td.edit a').click(function(e) {
+		var row = parse_row(this),
+			has = row[0],
+			biz = row[1];
+
+		$('#donor-business').attr('checked', !!biz).triggerHandler('click');
+
+		$('#donor-list-form fieldset :input[name^=donor]').each(function(i, f) {
+			var key = f.name.match(/\[([^\]]+)\]/)[1];
+			$(f).val( has[key] || '' );
+		});
+
 		return false;
 	});
 
@@ -57,7 +68,18 @@ jQuery(function($) {
 
 	}).end()
 
-	.find(':submit').enable();
+	// .find(':submit').enable();
+	.find(':submit').enable(false);
+
+	// cancel & delete bindings
+	$('#donor-cancel').click(function() {
+		$('#donor-list-form fieldset :input').clearFields().filter('[name="donor[id]"]').val('');
+		$('#donor-business').attr('checked', false).triggerHandler('click');
+	});
+
+	$('#donor-delete').click(function() {
+		return false;
+	});
 
 	// IE trollover
 	if ($.browser.msie) {
