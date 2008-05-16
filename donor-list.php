@@ -96,7 +96,7 @@ class DonorList {
 					Edit Donor
 					<label for="donor-business"><input tabindex="1" type="checkbox" name="donor_business" id="donor-business" value="1" /> Business</label>
 				</h3>
-				<fieldset>
+				<fieldset class="submitbox">
 					<label for="donor-first-name">First Name
 						<input tabindex="1" type="text" name="donor[first_name]" id="donor-first-name" value="" />
 					</label>
@@ -109,11 +109,15 @@ class DonorList {
 					<label for="donor-state" class="state">State
 					<?php echo $this->state_select(); ?>
 					</label>
-					<p>
+					<br />
+					<p class="submit">
 						<input tabindex="1" disabled="disabled" type="submit" name="submit" value="Submit" id="donor-submit" />
+						<input type="button" id="donor-cancel" value="Cancel" class="button-secondary" />
+						<a id="donor-delete" class="submitdelete" href="#delete" title="Delete Donor">Delete</a>
+						<br />
+						<input type="hidden" name="donor[id]" value="" />
 					</p>
 				</fieldset>
-				<input type="hidden" name="donor[id]" value="" />
 				<input type="hidden" name="action" value="<?php echo $this->nonce_key; ?>" />
 				<input type="hidden" name="_wpnonce" value="<?php echo $nonce; ?>" />
 			</div>

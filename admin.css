@@ -37,18 +37,14 @@ div.wrap #donor-list thead th {
 	overflow: hidden;
 	display: none;
 }
-
-div.wrap #donor-list tbody tr.troll td,
-div.wrap #donor-list tbody tr:hover td,
-div.wrap #donor-list tbody tr.troll th,
-div.wrap #donor-list tbody tr:hover th {
+div.wrap #donor-list tbody tr.troll td, div.wrap #donor-list tbody tr:hover td,
+div.wrap #donor-list tbody tr.troll th, div.wrap #donor-list tbody tr:hover th {
 	background-color:   #e4f2fd;
 	border-right-color: #e4f2fd;
 	border-top-color:    #80b5d0;
 	border-bottom-color: #80b5d0;
 }
-div.wrap #donor-list tr.troll td.edit a,
-div.wrap #donor-list tr:hover td.edit a {
+div.wrap #donor-list tr.troll td.edit a,div.wrap #donor-list tr:hover td.edit a {
 	display: block;
 	border: 1px solid #80b5d0;
 	border-left: none;
@@ -77,15 +73,27 @@ div.wrap #donor-list tr:hover td.edit a {
 	padding-right: 1em;
 }
 #donor-edit fieldset {
-	padding: 0.25em 0.75em 1em;
+	padding: 0.25em 0.25em 0.75em 0.75em;
 	color: #246;
 	background-color: #e4f2fd;
-	/*background-color: #c6d9e9;*/
 	border: 1px solid #80b5d0;
-	-moz-border-radius:    3px;
-	-khtml-border-radius:  3px;
-	-webkit-border-radius: 3px;
-	border-radius: 3px;
+}
+#donor-edit fieldset,
+#donor-edit fieldset p.submit {
+	-moz-border-radius:    4px;
+	-khtml-border-radius:  4px;
+	-webkit-border-radius: 4px;
+	border-radius:         4px;
+}
+#donor-edit fieldset p.submit {
+	clear: both;
+	margin: 1.25em 1em 0.5em 0.5em;
+	padding: 1.5em 0 0.75em;
+	text-align: center;
+	border-top: none;
+}
+#donor-edit fieldset br {
+	clear: both;
 }
 
 #donor-edit label {
@@ -117,17 +125,8 @@ div.wrap #donor-list tr:hover td.edit a {
 #donor-city {
 	width: 10em;
 }
-
-#donor-edit fieldset p {
-	clear: left;
-	margin: 0;
-	padding: 1.5em 0 0.75em;
-	text-align: center;
-}
-#donor-edit fieldset p input {
-	font-size: 1.5em;
-}
-
+#donor-submit { margin-right: 0.7em; }
+#donor-cancel { margin-left:  0.7em; }
 
 /* IE ghetto */
 * html #donor-edit {
@@ -140,3 +139,23 @@ div.wrap #donor-list tr:hover td.edit a {
 * html #donor-list td.edit a {
 	margin-left: -1px;
 }
+* html #donor-edit fieldset {
+	padding-bottom: 1.1em;
+}
+* html #donor-edit fieldset label select {
+	font-size: 1.2em;
+	margin-top: 2px;
+	margin-left: 0;
+}
+* html #donor-edit fieldset p.submit {
+	padding-top: 0.75em;
+	margin-top:  2.5em;
+	vertical-align: middle;
+	border-top: none;
+}
+* html #donor-edit fieldset p input {
+	font-size: 1.25em;
+	margin-top: 0.5em;
+}
+* html #donor-submit { margin-right: 0.6em; }
+* html #donor-cancel { margin-left:  0.6em; }
