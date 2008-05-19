@@ -1,38 +1,39 @@
 div.wrap #donor-list {
-	border-right-width: 0;
+	border-right: none;
 	border-collapse: separate;
 }
+div.wrap #donor-list thead td,
 div.wrap #donor-list thead th {
 	padding-bottom: 6px;
 }
-#donor-list tbody tr * {
-	cursor: pointer;
+#donor-list tbody tr * { cursor: pointer; }
+#donor-list tbody tr td,
+#donor-list tbody tr th {
 	padding-top:    4px;
 	padding-bottom: 4px;
 	border-top:    1px solid #fff;
 	border-bottom: 1px solid #fff;
 }
-#donor-list tbody tr.alt * {
+#donor-list tbody tr.alt td,
+#donor-list tbody tr.alt th {
 	border-top-color: #ccc;
 	border-bottom-color: #ccc;
 }
-#donor-list th.cs,
-#donor-list tbody tr td {
-	border-right: 1px solid #aaa;
-}
-#donor-list td.edit {
-	padding: 0;
+#donor-list tr td { border-right: 1px solid #aaa; }
+#donor-list tbody th a {
+	text-decoration: none;
+	margin: 0;
+	line-height: 1;
+	padding: 0 0 0 4px;
 	border: none;
-	vertical-align: top;
-	background-color: #fff !important;
-	position: relative;
+	vertical-align: -1px;
 }
-#donor-list td.edit a {
-	padding: 12px 14px 12px 18px;
+#donor-list td a.edit {
+	padding: 10px 14px 12px 14px;
 	text-decoration: none;
 	position: absolute;
-	margin-top:  -8px;
-	margin-left: -5px;
+	margin-top: -12px;
+	/* left decided via JS */
 	background-color: #e4f2fd;
 	overflow: hidden;
 	display: none;
@@ -44,27 +45,26 @@ div.wrap #donor-list tbody tr.troll th, div.wrap #donor-list tbody tr:hover th {
 	border-top-color:    #80b5d0;
 	border-bottom-color: #80b5d0;
 }
-div.wrap #donor-list tr.troll td.edit a,div.wrap #donor-list tr:hover td.edit a {
+div.wrap #donor-list tr.troll td a.edit,div.wrap #donor-list tr:hover td a.edit {
 	display: block;
 	border: 1px solid #80b5d0;
-	border-left: none;
-	-moz-border-radius:    20px;
-	-khtml-border-radius:  20px;
-	-webkit-border-radius: 20px;
-	border-radius:         20px;
+	border-left:none;
+	-moz-border-radius:    18px;
+	-khtml-border-radius:  18px;
+	-webkit-border-radius: 18px;
+	border-radius:         18px;
 }
 
 /* edit donor form */
 #donor-edit {
 	position: fixed;
 	top: 23%;
-	left: 30em;
+	/* left decided via JS */
 	width: 18.2em;
-	padding: 1.4em 0 0.6em 2em;
+	padding: 1.4em 0 0.6em;
+	margin-left: 2.5em;
 }
-#donor-edit h3 {
-	margin-bottom: 0.5em;
-}
+#donor-edit h3 { margin-bottom: 0.5em; }
 #donor-edit h3 label {
 	font-size: small;
 	font-weight: normal;
@@ -92,9 +92,7 @@ div.wrap #donor-list tr.troll td.edit a,div.wrap #donor-list tr:hover td.edit a 
 	text-align: center;
 	border-top: none;
 }
-#donor-edit fieldset br {
-	clear: both;
-}
+#donor-edit fieldset br { clear: both; }
 
 #donor-edit label {
 	-moz-user-select: none;
@@ -110,37 +108,30 @@ div.wrap #donor-list tr.troll td.edit a,div.wrap #donor-list tr:hover td.edit a 
 	text-align: center;
 	padding-left: 0.9em;
 }
-#donor-edit fieldset label * {
-	display: block;
-}
+#donor-edit fieldset label * { display: block; }
 #donor-edit fieldset label input {
 	margin: 1px;
 	padding: 3px;
 }
 
 #donor-first-name,
-#donor-last-name {
-	width: 15em;
-}
-#donor-city {
-	width: 10em;
-}
+#donor-last-name,
+#donor-email { width: 15em; }
+#donor-city  { width: 10em; }
 #donor-submit { margin-right: 0.7em; }
 #donor-cancel { margin-left:  0.7em; }
 
 /* IE ghetto */
 * html #donor-edit {
 	position: absolute;
+	display: none; /* removed by JS */
 	top: 170px;
+	margin-left: 1em;
 }
-* html #donor-edit h3 label {
-	margin-top: -20px;
-}
-* html #donor-list td.edit a {
-	margin-left: -1px;
-}
+* html #donor-edit h3 label { margin-top: -20px; }
 * html #donor-edit fieldset {
 	padding-bottom: 1.1em;
+	margin-top: 1px;
 }
 * html #donor-edit fieldset label select {
 	font-size: 1.2em;
@@ -159,3 +150,5 @@ div.wrap #donor-list tr.troll td.edit a,div.wrap #donor-list tr:hover td.edit a 
 }
 * html #donor-submit { margin-right: 0.6em; }
 * html #donor-cancel { margin-left:  0.6em; }
+* html #donor-list tbody th a { height: 13px; }
+* html #donor-list tbody th a img { margin-left: 4px; }

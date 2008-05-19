@@ -39,6 +39,7 @@ class DonorList {
 		$base = plugin_basename( dirname( __FILE__ ) );
 		$this->plugin_url = get_option('siteurl') . "/wp-content/plugins/$base/";
 		$this->nonce_key  = 'donor_list_edit';
+		$this->email_icon = "<img src=\"{$this->plugin_url}email_edit.png\" height=\"13\" width=\"16\" alt=\"email\" />";
 
 		$admin_print_script = "admin_print_scripts-toplevel_page_$base/$base";
 
@@ -80,7 +81,7 @@ class DonorList {
 		?>
 		<div class="wrap">
 			<h2>Donor List</h2>
-			<?php echo $this->get_list( array('edit' => 1) ); ?>
+			<?php echo $this->get_list( array('edit' => 1, 'email' => 1) ); ?>
 			<?php $this->admin_form(); ?>
 		</div>
 		<?php
@@ -98,16 +99,19 @@ class DonorList {
 				</h3>
 				<fieldset class="submitbox">
 					<label for="donor-first-name">First Name
-						<input tabindex="1" type="text" name="donor[first_name]" id="donor-first-name" value="" />
+						<input tabindex="1" type="text" name="donor[first_name]" id="donor-first-name" value="" class="required" />
 					</label>
 					<label for="donor-last-name">Last Name
-						<input tabindex="1" type="text" name="donor[last_name]"  id="donor-last-name"  value="" />
+						<input tabindex="1" type="text" name="donor[last_name]"  id="donor-last-name"  value="" class="required" />
 					</label>
 					<label for="donor-city">City
 						<input tabindex="1" type="text" name="donor[city]" id="donor-city" value="" />
 					</label>
 					<label for="donor-state" class="state">State
 					<?php echo $this->state_select(); ?>
+					</label>
+					<label for="donor-email">Email
+						<input tabindex="1" type="text" name="donor[email]"  id="donor-email"  value="" />
 					</label>
 					<br />
 					<p class="submit">
@@ -222,18 +226,24 @@ class DonorList {
 		);
 		$statement = array();
 
+		// sanitize email first, if present
+		if ( array_key_exists( 'email', $posted ) )
+			$posted['email'] = sanitize_email( $posted['email'] );
+
 		foreach ( $fieldtypes as $field => $type ) {
 			$exists = ( array_key_exists( $field, $posted ) && trim( $posted[$field] ) );
 			$statement[] = "$field = " . (( $exists ) ? $type : 'NULL');
 			if ( ! $exists ) unset( $fieldtypes[ $field ] );
 		}
+		// TODO: catch empties
 
 		// string to be formatted, first argument to wpdb->prepare
 		$values = array( implode( ",\n\t", $statement ) );
 
 		// values for replacements, 1+nth args to wpdb->prepare
 		foreach ( $fieldtypes as $key => $value ) {
-			$values[] = trim( wp_specialchars( $posted[ $key ] ) );
+			// stripslashes to avoid doubling by subsequent wpdb->prepare
+			$values[] = trim( wp_specialchars( stripslashes( $posted[ $key ] ) ) );
 		}
 
 		// magic!
@@ -250,7 +260,9 @@ class DonorList {
 		$sql  = ( $id ? "UPDATE" : "INSERT INTO" );
 		$sql .= " {$this->db_table_name} SET\n\t";
 		$sql .= "$values" . ( $id ? $wpdb->prepare( "\nWHERE id = %u;", $id ) : ';' );
-		return $sql;
+		// return $sql;
+		$success = $wpdb->query( $sql );
+		return "$success";
 	}
 
 	function delete( $id ) {
@@ -270,7 +282,8 @@ class DonorList {
 
 		extract( shortcode_atts( array(
 			'limit' => 0,
-			'edit'  => 0
+			'edit'  => 0,
+			'email' => 0
 		), array_filter( (array) $attrs ) ) );
 
 		$_edit  = false;
@@ -285,29 +298,33 @@ class DonorList {
 		$donors = $wpdb->get_results( $sql );
 
 		if ( is_admin() && true === (bool) $edit ) {
-			$_edit = '<td class="edit"><a href="#REPLACE" title="Edit Donor">edit</a></td>';
+			$_edit = '<a href="#REPLACE" class="edit" title="Edit Donor">edit</a>';
 		}
 
 		$s = array(
 		"\n\t<table id=\"donor-list\" cellspacing=\"0\">",
 		"\t<caption>Alphabetized by Last Name or Business Name</caption>",
 		"<thead>",
-		"\t<tr><th>Name ( <span>Last, First</span> )</th><th class=\"cs\">City, State</th></tr>",
+		"\t<tr><th>Name ( <span>Last, First</span> )</th><td>City, State</td></tr>",
 		"</thead>",
 		"<tbody>"
 		);
-		$edit_link = '';
+		$edit_link  = '';
+		$email_link = '';
 		
 		foreach ( $donors as $i => $donor ) {
 			$alt = !( $i % 2 ) ? ' class="alt"' : '';
-			$edit_link = preg_replace( '/REPLACE/', "{$donor->id},{$donor->state}", $_edit );
+			$edit_link = preg_replace( '/REPLACE/', "{$donor->id}_{$donor->state}", $_edit );
 			$citystate = ( trim( $donor->city ) )
-				? "<td>{$donor->city}, {$donor->iso}</td>"
-				: '<td><br /></td>';
+				? "<td>{$edit_link}<span>{$donor->city}, {$donor->iso}</span></td>"
+				: "<td>{$edit_link}&nbsp;</td>";
+			$email_link = ( $email && trim( $donor->email ) )
+				? '<a href="mailto:'. $donor->email .'" title="email">'. $this->email_icon .'</a>'
+				: '' ;
 			$firstlast = ( $first = preg_replace( '/ and /', ' &amp; ', $donor->first_name ) )
-				? "<th>{$donor->last_name}, {$first}</th>"
-				: "<th>{$donor->last_name}</th>";
-			$s[] = "\t<tr$alt>{$firstlast}{$citystate}{$edit_link}</tr>";
+				? "<th><span>{$donor->last_name}, {$first}</span>{$email_link}</th>"
+				: "<th><span>{$donor->last_name}</span>{$email_link}</th>";
+			$s[] = "\t<tr$alt>{$firstlast}{$citystate}</tr>";
 		}
 		$s[] = "</tbody>";
 		$s[] = "</table>\n";
