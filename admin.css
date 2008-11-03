@@ -29,22 +29,25 @@ div.wrap #donor-list thead th {
 	vertical-align: -1px;
 }
 #donor-list td a.edit {
+/*
 	padding: 10px 14px 12px 14px;
+	background-color: #e4f2fd;
 	text-decoration: none;
+	overflow: hidden;
 	position: absolute;
 	margin-top: -12px;
+*/
 	/* left decided via JS */
-	background-color: #e4f2fd;
-	overflow: hidden;
 	display: none;
 }
 div.wrap #donor-list tbody tr.troll td, div.wrap #donor-list tbody tr:hover td,
 div.wrap #donor-list tbody tr.troll th, div.wrap #donor-list tbody tr:hover th {
 	background-color:   #e4f2fd;
-	border-right-color: #e4f2fd;
+/*	border-right-color: #e4f2fd;*/
 	border-top-color:    #80b5d0;
 	border-bottom-color: #80b5d0;
 }
+/*
 div.wrap #donor-list tr.troll td a.edit,div.wrap #donor-list tr:hover td a.edit {
 	display: block;
 	border: 1px solid #80b5d0;
@@ -54,6 +57,7 @@ div.wrap #donor-list tr.troll td a.edit,div.wrap #donor-list tr:hover td a.edit 
 	-webkit-border-radius: 18px;
 	border-radius:         18px;
 }
+*/
 
 /* edit donor form */
 #donor-edit {
@@ -62,7 +66,7 @@ div.wrap #donor-list tr.troll td a.edit,div.wrap #donor-list tr:hover td a.edit 
 	/* left decided via JS */
 	width: 18.2em;
 	padding: 1.4em 0 0.6em;
-	margin-left: 2.5em;
+/*	margin-left: 2.5em;*/
 }
 #donor-edit h3 { margin-bottom: 0.5em; }
 #donor-edit h3 label {
@@ -126,7 +130,7 @@ div.wrap #donor-list tr.troll td a.edit,div.wrap #donor-list tr:hover td a.edit 
 	position: absolute;
 	display: none; /* removed by JS */
 	top: 170px;
-	margin-left: 1em;
+/*	margin-left: 1em;*/
 }
 * html #donor-edit h3 label { margin-top: -20px; }
 * html #donor-edit fieldset {

@@ -2,8 +2,8 @@
 jQuery(function($) {
 
 	// width hacks (grr)
-	var list_width = parseInt($('#donor-list').width()) + ($.browser.msie ? 65 : 50) + 'px',
-		cell_width = parseInt($('#donor-list tbody td').width()) + ($.browser.msie ? 8 : 4) + 'px';
+	var list_width = parseInt($('#donor-list').width(), 10) + ($.browser.msie ? 65 : 50) + 'px',
+		cell_width = parseInt($('#donor-list tbody td').width(), 10) + ($.browser.msie ? 8 : 4) + 'px';
 
 	$('#donor-edit').css({ 'left': list_width, 'display': 'block' });
 	// "display: block" for IE
@@ -14,8 +14,8 @@ jQuery(function($) {
 			$row  = $(anchor).parents('tr').eq(0);
 			splat = anchor.href.split('#').pop().split('_');
 
-		hash['id']    = parseInt(splat[0]);
-		hash['state'] = parseInt(splat[1]);
+		hash['id']    = parseInt(splat[0], 10);
+		hash['state'] = parseInt(splat[1], 10);
 
 		$row.find('span').each(function(i, s) {
 			var n = jQuery.trim($(s).text()).split(', ');
@@ -33,21 +33,26 @@ jQuery(function($) {
 		return [ hash, !hash.first_name ];
 	};
 
-	$('#donor-list a.edit').click(function(e) {
-		var row = parse_row(this),
+	// fields updated when edit link clicked
+	var donor_fields = $('#donor-list-form fieldset :input[name^=donor]');
+
+	$('#donor-list').click(function(e) {
+		var target = $(e.target).is('a.edit') ? e.target
+			: $(e.target).parents('tr').eq(0).find('a.edit')[0];
+
+		var row = parse_row(target),
 			has = row[0],
 			biz = row[1];
 
 		$('#donor-business').attr('checked', !!biz).triggerHandler('click');
 
-		$('#donor-list-form fieldset :input[name^=donor]').each(function(i, f) {
+		donor_fields.each(function(i, f) {
 			var key = f.name.match(/\[([^\]]+)\]/)[1];
 			$(f).val( has[key] || '' );
 		});
 
 		return false;
-	})
-	.css('margin-left', cell_width); // hack hack hack hack
+	});
 
 	// hook form
 	$('#donor-list-form').ajaxForm({
@@ -57,10 +62,8 @@ jQuery(function($) {
 				return 0 === $.trim($(this).val()).length;
 			});
 			if (invalid.length) {
-				var named = $.trim(
-					invalid.eq(0).parent('label').contents().filter("[nodeType=3]")[0].nodeValue
-				);
-				alert('Please enter a ' + $.trim( named ) + ' to continue.');
+				var noun = $.trim(invalid.eq(0).parent('label').text());
+				alert('Please enter a ' + noun + ' to continue.');
 				invalid[0].select();
 				return false;
 			}
@@ -70,7 +73,7 @@ jQuery(function($) {
 		resetForm: true,
 
 		success: function(r) {
-			alert(r.toString());
+			// alert(r.toString());
 			$('#donor-list-form :submit').enable();
 		}
 	})
@@ -96,7 +99,7 @@ jQuery(function($) {
 			var label = $(this);
 
 			// disable first_name if business
-			label.children('input').enable(!box.checked)
+			label.children('input').enable(!box.checked);
 
 			// focus the first visible element
 			setTimeout(function() {
